@@ -1,61 +1,30 @@
-# Base Image: Ubuntu
 FROM ubuntu:latest
-
-# Env
+LABEL maintainer="orkunergun <hesaphesapyus@gmail.com>"
 ENV DEBIAN_FRONTEND noninteractive
-ENV USER Orkun
-ENV HOSTNAME Comp
-ENV LC_ALL C
-ENV USE_CCACHE 1
-ENV CCACHE_SIZE 10G
-ENV CCACHE_EXEC /usr/bin/ccache
 
-# Working Directory
 WORKDIR /tmp
 
-# Maintainer
-MAINTAINER orkunergun <hesaphesapyus@gmail.com>
+RUN apt-get -yqq update \
+    && apt-get install --no-install-recommends -yqq adb autoconf automake axel bc bison build-essential clang cmake curl expat expect fastboot flex g++ g++-multilib gawk gcc gcc-multilib gcc-10 g++-10 g++-10-multilib git-core gnupg gperf htop imagemagick locales libncurses5 lib32ncurses5-dev lib32z1-dev libtinfo5 libc6-dev libcap-dev libexpat1-dev libgmp-dev '^liblz4-.*' '^liblzma.*' libmpc-dev libmpfr-dev libncurses5-dev libnl-route-3-dev libprotobuf-dev libsdl1.2-dev libssl-dev libtool libxml-simple-perl libxml2 libxml2-utils lld lsb-core lzip '^lzma.*' lzop maven nano ncftp ncurses-dev openssh-server patch patchelf pkg-config pngcrush pngquant protobuf-compiler python2.7 python3-apt python-all-dev python-is-python3 re2c rsync schedtool screen squashfs-tools subversion sudo tar texinfo tmate tzdata unzip w3m wget xsltproc zip zlib1g-dev zram-config \
+    && curl --create-dirs -L -o /usr/local/bin/repo -O -L https://raw.githubusercontent.com/geopd/git-repo/main/repo \
+    && chmod a+rx /usr/local/bin/repo \
+    && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* \
+    && echo 'en_US.UTF-8 UTF-8' > /etc/locale.gen && /usr/sbin/locale-gen \
+    && TZ=Europe/Istanbul\
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Install dependencies
-RUN set -x \
-    && apt-get -yqq update \
-    && apt-get install --no-install-recommends -yqq \
-    git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig \
-    ca-certificates bc cpio imagemagick bsdmainutils python2 python-is-python3 lz4 aria2 ccache rclone ssh-client libncurses5 libssl-dev rsync schedtool sudo lld && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm -rf /var/cache/apt/archives && \
-    rm -rf /usr/share/doc/ /usr/share/man/ /usr/share/man/
+RUN git clone https://github.com/mirror/make \
+    && cd make && ./bootstrap && ./configure && make CFLAGS="-O3 -Wno-error" \
+    && sudo install ./make /usr/bin/make
 
-# Install repo
-RUN set -x \
-    && curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo \
-    && chmod a+x /usr/local/bin/repo
+RUN curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip \
+    && unzip rclone-current-linux-amd64.zip && cd rclone-*-linux-amd64 \
+    && sudo cp rclone /usr/bin/ && sudo chown root:root /usr/bin/rclone \
+    && sudo chmod 755 /usr/bin/rclone
 
-# Install gh
-RUN set -x \
-    && curl -LO https://github.com/cli/cli/releases/download/v2.21.2/gh_2.21.2_linux_amd64.deb \
-    && dpkg -i gh* \
-    && rm gh*
+RUN git clone https://github.com/ccache/ccache.git && cd ccache && git reset --hard 8c2da59 \
+    && mkdir build && cd build && export CC=gcc-10 CXX=g++-10 && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. \
+    && make CFLAGS="-O3" && sudo make install
 
-# Create seperate build user
-RUN groupadd -g 1000 -r ${USER} && \
-    useradd -u 1000 --create-home -r -g ${USER} ${USER}
-
-# Allow sudo without password for build user
-RUN echo "${USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USER} && \
-    usermod -aG sudo ${USER}
-
-USER ${USER}
-
-# Configure git
-RUN git config --global user.name ${USER} && git config --global user.email ${USER}@${HOSTNAME} && \
-    git config --global color.ui auto
-RUN set -x \
-    && curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo \
-    && chmod a+x ~/bin/repo
-RUN echo 'export PATH=~/bin:$PATH' > ~/.bashrc
-
-# Run bash
-VOLUME ["/tmp/ccache"]
+VOLUME ["/tmp/ccache", "/tmp/rom"]
 ENTRYPOINT ["/bin/bash"]
