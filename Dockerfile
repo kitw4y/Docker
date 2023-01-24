@@ -13,18 +13,5 @@ RUN apt-get -yqq update \
     && TZ=Europe/Istanbul\
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-RUN git clone https://github.com/mirror/make \
-    && cd make && ./bootstrap && ./configure && make CFLAGS="-O3 -Wno-error" \
-    && sudo install ./make /usr/bin/make
-
-RUN curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip \
-    && unzip rclone-current-linux-amd64.zip && cd rclone-*-linux-amd64 \
-    && sudo cp rclone /usr/bin/ && sudo chown root:root /usr/bin/rclone \
-    && sudo chmod 755 /usr/bin/rclone
-
-RUN git clone https://github.com/ccache/ccache.git && cd ccache && git reset --hard 8c2da59 \
-    && mkdir build && cd build && export CC=gcc-10 CXX=g++-10 && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. \
-    && make CFLAGS="-O3" && sudo make install
-
-VOLUME ["/tmp/ccache", "/tmp/rom"]
+VOLUME ["/tmp/ccache"]
 ENTRYPOINT ["/bin/bash"]
