@@ -27,6 +27,11 @@ RUN set -x \
     rm -rf /var/cache/apt/archives && \
     rm -rf /usr/share/doc/ /usr/share/man/ /usr/share/man/
 
+# Install repo
+RUN set -x \
+    && curl https://storage.googleapis.com/git-repo-downloads/repo > /usr/local/bin/repo \
+    && chmod a+x /usr/local/bin/repo
+
 # Install gh
 RUN set -x \
     && curl -LO https://github.com/cli/cli/releases/download/v2.21.2/gh_2.21.2_linux_amd64.deb \
@@ -46,8 +51,6 @@ USER ${USER}
 # Configure git
 RUN git config --global user.name ${USER} && git config --global user.email ${USER}@${HOSTNAME} && \
     git config --global color.ui auto
-
-# Install repo
 RUN set -x \
     && curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo \
     && chmod a+x ~/bin/repo
