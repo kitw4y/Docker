@@ -16,7 +16,7 @@ env:
 
   # Image name and tag. MUST be lowercase
   IMAGE_NAME: docker
-  IMAGE_TAG: latest
+  IMAGE_TAG: ubuntu
 
 jobs:
   push:
