@@ -47,6 +47,10 @@ USER ${USER}
 RUN git config --global user.name ${USER} && git config --global user.email ${USER}@${HOSTNAME} && \
     git config --global color.ui auto
 
+# Install repo
+RUN curl --create-dirs -L -o /usr/local/bin/repo -O -L https://raw.githubusercontent.com/geopd/git-repo/main/repo \
+    && chmod a+rx /usr/local/bin/repo \
+
 # Run bash
 VOLUME ["/tmp/ccache"]
 ENTRYPOINT ["/bin/bash"]
