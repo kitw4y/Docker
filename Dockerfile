@@ -48,8 +48,10 @@ RUN git config --global user.name ${USER} && git config --global user.email ${US
     git config --global color.ui auto
 
 # Install repo
-RUN curl --create-dirs -L -o /usr/local/bin/repo -O -L https://raw.githubusercontent.com/geopd/git-repo/main/repo \
-    && chmod a+rx /usr/local/bin/repo \
+RUN set -x \
+    && curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo \
+    && chmod a+x ~/bin/repo
+RUN echo 'export PATH=~/bin:$PATH' > ~/.bashrc
 
 # Run bash
 VOLUME ["/tmp/ccache"]
