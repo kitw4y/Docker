@@ -13,5 +13,11 @@ RUN apt-get -yqq update \
     && TZ=Europe/Istanbul\
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# Install gh
+RUN set -x \
+    && curl -LO https://github.com/cli/cli/releases/download/v2.22.1/gh_2.22.1_linux_amd64.deb \
+    && dpkg -i gh* \
+    && rm gh*
+
 VOLUME ["/tmp/ccache"]
 ENTRYPOINT ["/bin/bash"]
