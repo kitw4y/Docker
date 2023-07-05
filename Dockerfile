@@ -19,5 +19,9 @@ RUN set -x \
     && dpkg -i gh* \
     && rm gh*
 
+# Install Git-Lfs
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
+    && apt-get install git-lfs
+
 VOLUME ["/tmp/ccache"]
 ENTRYPOINT ["/bin/bash"]
