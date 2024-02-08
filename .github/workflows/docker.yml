@@ -34,7 +34,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: orkunergun/docker:ubuntu
+          tags: galang8664/docker:tagname
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
